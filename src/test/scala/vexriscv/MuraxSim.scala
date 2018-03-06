@@ -2,6 +2,7 @@ package vexriscv
 
 import java.awt
 import java.awt.event.{ActionEvent, ActionListener, MouseEvent, MouseListener}
+import java.io.File
 
 import spinal.sim._
 import spinal.core._
@@ -15,11 +16,11 @@ import spinal.lib.com.uart.sim.{UartDecoder, UartEncoder}
 import scala.collection.mutable
 
 
-
+//Openocd => src/openocd -f tcl/interface/jtag_tcp.cfg -c 'set MURAX_CPU0_YAML ../VexRiscvLab/cpu0.yaml' -f tcl/target/murax.cfg
 object MuraxSim {
   def main(args: Array[String]): Unit = {
-//    def config = MuraxConfig.default.copy(onChipRamSize = 256 kB)
-    def config = MuraxConfig.default.copy(onChipRamSize = 4 kB, onChipRamHexFile = "src/main/ressource/hex/muraxDemo.hex")
+    def config = MuraxConfig.default.copy(onChipRamSize = 256 kB)
+ //    def config = MuraxConfig.default.copy(onChipRamSize = 4 kB, onChipRamHexFile = "src/main/ressource/hex/muraxDemo.hex")
 
     SimConfig.allOptimisation.compile(new Murax(config)).doSimUntilVoid{dut =>
       val mainClkPeriod = (1e12/dut.config.coreFrequency.toDouble).toLong
@@ -30,6 +31,15 @@ object MuraxSim {
       val clockDomain = ClockDomain(dut.io.mainClk, dut.io.asyncReset)
       clockDomain.forkStimulus(mainClkPeriod)
 //      clockDomain.forkSimSpeedPrinter(2)
+
+//      val openocd = new Thread  {
+//        override def run() = {
+//          Thread.sleep(400)
+//          scala.sys.process.Process(Seq("src/openocd","-f", "tcl/interface/jtag_tcp.cfg","-c","set MURAX_CPU0_YAML ../VexRiscvLab/cpu0.yaml", "-f","tcl/target/murax.cfg"), new File("../openocd_riscv")).!
+//        }
+//      }
+//      openocd.start()
+
 
       val tcpJtag = JtagTcp(
         jtag = dut.io.jtag,

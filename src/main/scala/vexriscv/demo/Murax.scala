@@ -252,12 +252,10 @@ case class Murax(config : MuraxConfig) extends Component{
 
 
     //******** APB peripherals *********
-    val gpioACtrl = Apb3Gpio(gpioWidth = gpioWidth)
+    val gpioACtrl = new ApbGpio(gpioWidth = gpioWidth) //TODO fill Apb3Gpio implementation
     io.gpioA <> gpioACtrl.io.gpio
 
-    val uartCtrl = Apb3UartCtrl(uartCtrlConfig)
-    uartCtrl.io.uart <> io.uart
-    externalInterrupt setWhen(uartCtrl.io.interrupt)
+    io.uart.txd := True //TODO
 
     val timer = new MuraxApb3Timer()
     timerInterrupt setWhen(timer.io.interrupt)
@@ -269,7 +267,6 @@ case class Murax(config : MuraxConfig) extends Component{
       master = apbBridge.io.apb,
       slaves = List[(Apb3, SizeMapping)](
         gpioACtrl.io.apb -> (0x00000, 4 kB),
-        uartCtrl.io.apb  -> (0x10000, 4 kB),
         timer.io.apb     -> (0x20000, 4 kB)
       )
     )
