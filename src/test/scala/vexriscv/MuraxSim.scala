@@ -19,10 +19,12 @@ import scala.collection.mutable
 //Openocd => src/openocd -f tcl/interface/jtag_tcp.cfg -c 'set MURAX_CPU0_YAML ../VexRiscvLab/cpu0.yaml' -f tcl/target/murax.cfg
 object MuraxSim {
   def main(args: Array[String]): Unit = {
-    def config = MuraxConfig.default.copy(onChipRamSize = 256 kB)
- //    def config = MuraxConfig.default.copy(onChipRamSize = 4 kB, onChipRamHexFile = "src/main/ressource/hex/muraxDemo.hex")
+  //  def config = MuraxConfig.default.copy(onChipRamSize = 256 kB)
+  //def config = MuraxConfig.default.copy(coreFrequency = 66 MHz, onChipRamSize = 4 kB, onChipRamHexFile = "src/main/ressource/hex/demo.hex")
+//  def config = MuraxConfig.default.copy(coreFrequency = 66 MHz, onChipRamSize = 4 kB, onChipRamHexFile = "/home/clean-mint/spinal/VexRiscvSocSoftware/projects/murax/demo/build/demo.hex")
+    def config = MuraxConfig.default.copy(coreFrequency = 66 MHz, onChipRamSize = 4 kB, onChipRamHexFile = "/home/clean-mint/spinal/VexRiscvSocSoftware/projects/murax/draw/build/draw.hex")
 
-    SimConfig.allOptimisation.compile(new Murax(config)).doSimUntilVoid{dut =>
+    SimConfig.allOptimisation.withWave.compile(new Murax(config)).doSimUntilVoid{dut =>
       val mainClkPeriod = (1e12/dut.config.coreFrequency.toDouble).toLong
       val jtagClkPeriod = mainClkPeriod*4
       val uartBaudRate = 115200

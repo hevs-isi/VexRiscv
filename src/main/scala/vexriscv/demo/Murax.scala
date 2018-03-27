@@ -9,6 +9,7 @@ import spinal.lib.com.uart._
 import spinal.lib.io.{InOutWrapper, TriStateArray}
 import spinal.lib.misc.{InterruptCtrl, Prescaler, Timer}
 import spinal.lib.soc.pinsec.{PinsecTimerCtrl, PinsecTimerCtrlExternal}
+import vexriscv.lab.{ApbGpio, DrawCtrl}
 import vexriscv.plugin._
 import vexriscv.{VexRiscv, VexRiscvConfig, plugin}
 
@@ -148,6 +149,7 @@ case class Murax(config : MuraxConfig) extends Component{
     //Peripherals IO
     val gpioA = master(TriStateArray(gpioWidth bits))
     val uart = master(Uart())
+    val drawX, drawY = out Bool
   }
 
 
@@ -260,27 +262,34 @@ case class Murax(config : MuraxConfig) extends Component{
     val timer = new MuraxApb3Timer()
     timerInterrupt setWhen(timer.io.interrupt)
 
-
+    val drawCtrl = new DrawCtrl(
+      channelCount = 2,
+      signalBitNb = 16,
+      memSize = 16,
+      timerWidth  = 16
+    )
+    drawCtrl.io.channels(0) <> io.drawX
+    drawCtrl.io.channels(1) <> io.drawY
 
     //******** Memory mappings *********
     val apbDecoder = Apb3Decoder(
       master = apbBridge.io.apb,
       slaves = List[(Apb3, SizeMapping)](
         gpioACtrl.io.apb -> (0x00000, 4 kB),
-        timer.io.apb     -> (0x20000, 4 kB)
+        timer.io.apb     -> (0x20000, 4 kB),
+        drawCtrl.io.apb  -> (0x30000, 4 kB)
       )
     )
 
-    val mainBusDecoder = new Area {
-      val logic = new MuraxSimpleBusDecoder(
-        master = mainBusArbiter.io.masterBus,
-        specification = List[(SimpleBus,SizeMapping)](
-          ram.io.bus             -> (0x80000000l, onChipRamSize),
-          apbBridge.io.simpleBus -> (0xF0000000l, 1 MB)
-        ),
-        pipelineMaster = pipelineMainBus
-      )
-    }
+
+    val mainBusDecoder = new MuraxSimpleBusDecoder(
+      master = mainBusArbiter.io.masterBus,
+      specification = List[(SimpleBus,SizeMapping)](
+        ram.io.bus             -> (0x80000000l, onChipRamSize),
+        apbBridge.io.simpleBus -> (0xF0000000l, 1 MB)
+      ),
+      pipelineMaster = pipelineMainBus
+    )
   }
 }
 

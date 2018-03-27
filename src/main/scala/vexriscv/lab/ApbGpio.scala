@@ -1,10 +1,14 @@
-package vexriscv.demo
+package vexriscv.lab
 
 import spinal.core._
-import spinal.lib.bus.amba3.apb.{Apb3}
+import spinal.lib.bus.amba3.apb.Apb3
 import spinal.lib.io.TriStateArray
 import spinal.lib.{master, slave}
 
+
+//Memory mapping =>
+// 0x0 => read/write
+// 0x4 => direction, 1 => output
 class ApbGpio(gpioWidth: Int) extends Component {
   val io = new Bundle {
     val apb  = slave(Apb3(addressWidth = 4, dataWidth = 32))
