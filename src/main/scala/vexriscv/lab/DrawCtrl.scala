@@ -26,7 +26,8 @@ class DrawCtrl(channelCount : Int,
 
     val timer = new Area{
       val counter, speed = Reg(UInt(timerWidth bits)) init(0)
-      val (counterNext, tick) = AddWithCarry(counter,speed)
+      val (counterNext, carry) = AddWithCarry(counter,speed)
+      val tick = carry && run
       when(run) {
         counter := counterNext
       }
