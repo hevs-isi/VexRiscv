@@ -25,12 +25,10 @@ class DrawCtrl(channelCount : Int,
     }
 
     val timer = new Area{
-      val speed = Reg(UInt(timerWidth bits)) init(0)
-      val counter = Reg(UInt(timerWidth bits)) init(0)
-      val counterPlusSpeed = (U"0" @@ counter) + speed
-      val tick = counterPlusSpeed.msb && run
+      val counter, speed = Reg(UInt(timerWidth bits)) init(0)
+      val (counterNext, tick) = AddWithCarry(counter,speed)
       when(run) {
-        counter := counterPlusSpeed.resized
+        counter := counterNext
       }
     }
   }

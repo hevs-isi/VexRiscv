@@ -24,7 +24,7 @@ object MuraxSim {
 //  def config = MuraxConfig.default.copy(coreFrequency = 66 MHz, onChipRamSize = 4 kB, onChipRamHexFile = "/home/clean-mint/spinal/VexRiscvSocSoftware/projects/murax/demo/build/demo.hex")
     def config = MuraxConfig.default.copy(coreFrequency = 66 MHz, onChipRamSize = 4 kB, onChipRamHexFile = "/home/clean-mint/spinal/VexRiscvSocSoftware/projects/murax/draw/build/draw.hex")
 
-    SimConfig.allOptimisation.compile(new Murax(config)).doSimUntilVoid{dut =>
+    SimConfig.allOptimisation.withWave.compile(new Murax(config)).doSimUntilVoid{dut =>
       val mainClkPeriod = (1e12/dut.config.coreFrequency.toDouble).toLong
       val jtagClkPeriod = mainClkPeriod*4
       val uartBaudRate = 115200
